@@ -2,7 +2,7 @@ from libs.orm import db
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'user'  # 类变量定义在数据库中表的名字
     id = db.Column(db.Integer, primary_key=True)
     nickname = db.Column(db.String(20), unique=True)
     password = db.Column(db.String(128), nullable=False)

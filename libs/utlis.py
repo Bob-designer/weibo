@@ -1,6 +1,6 @@
 import os  # 产生一个urandom真实随机数（16字节的）
 # import random 产生的都是伪随机数
-from hashlib import sha256
+from hashlib import sha256, md5
 
 
 def make_password(password):
@@ -27,3 +27,21 @@ def check_password(password, safe_password):
     hash_value = sha256(password).hexdigest()
 
     return hash_value == safe_password[32:]
+
+
+def save_avatar(avatar_file):
+    # 保存头像文件
+    file_bin_data = avatar_file.stream.read()  # 读取文件的二进制数
+    # 文件指针归零
+    avatar_file.stream.seek(0)
+    # 计算文件名的md5值
+    filename = md5(file_bin_data).hexdigest()
+    # 获取项目文件夹绝对路径   abspath(__file__)获取当前文件夹的绝对路径
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # 文件的绝对路径
+    filepath = f'{base_dir}/static/upload/{filename}'
+    # 保存路径
+    avatar_file.save(filepath)
+    # 文件的url
+    avatar_url = f'/static/upload/{filename}'
+    return avatar_url

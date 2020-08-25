@@ -1,4 +1,4 @@
-#!/user/bin/env python
+#!/user/bin/env python 使用python的绝对路径
 import random
 import sys
 import os
@@ -12,7 +12,7 @@ from user.views import user_bp
 from weibo_function.views import weibo_function_bp
 
 # 初始化app
-app = Flask(__name__)
+app = Flask(__name__) #__name__导入的模块名字
 # 设置一个安全密钥
 app.secret_key = 'fgjhwjk789@#34%222wfeg'
 # flask -->flask-sqlalchemy-->pymysql-->mysql
