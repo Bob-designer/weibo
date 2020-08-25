@@ -1,8 +1,15 @@
+#!/user/bin/env python
+import random
+import sys
+import os
+
 from flask import Flask
 from flask_script import Manager  # 调试，把app包装在manager里面，程序运行调试通过它去实现
 from flask_migrate import Migrate, MigrateCommand
-from libs.orm import db
 
+from libs.orm import db
+from user.views import user_bp
+from weibo_function.views import weibo_function_bp
 
 # 初始化app
 app = Flask(__name__)
@@ -14,10 +21,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True  # 每次请求结束后都�
 # 初始化manager
 manager = Manager(app)
 
+
 # 初始化db和migrate  迁移工具
 db.init_app(app)
 migrate = Migrate(app, db)
 manager.add_command('db', MigrateCommand)
+
+# 注册蓝图 user_bp注册
+app.register_blueprint(user_bp)
+app.register_blueprint(weibo_function_bp)
 
 
 @app.route('/')
