@@ -3,13 +3,17 @@ from flask import render_template
 from flask import redirect
 from flask import request
 from flask import session
-from sqlalchemy.exc import IntegrityError  #哪里来的
+from sqlalchemy.exc import IntegrityError  # 哪里来的exc
 
 import datetime
+
+from sqlalchemy.orm.exc import NoResultFound
+
 from user.models import User
 from libs.utlis import make_password
 from libs.utlis import check_password
 from libs.utlis import save_avatar
+from libs.utlis import login_required
 from libs.orm import db
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
@@ -26,7 +30,7 @@ def register():
         birthday = request.form.get('birthday', '').strip()
         city = request.form.get('city', '').strip()
         bio = request.form.get('bio', '').strip()
-        now = datetime.datetime.now() #注册时间
+        now = datetime.datetime.now()  # 注册时间
         if not password1 or password1 != password2:
             return render_template('register', err='密码不符合要求')
         user = User(nickname=nickname, password=make_password(password1),
@@ -51,14 +55,36 @@ def register():
 
 @user_bp.route('/login', method=('POST', 'GET'))
 def login():
-    return render_template('login.html')
+    if request.method == 'POST':
+        nickname = request.form.get('nickname', '').strip()
+        password = request.form.get('password1', '').strip()
+        # 获取用户,不一定就能获取成功 所以要try
+        try:
+            user = User.query.filter_by(nickname=nickname).one()
+        except NoResultFound:
+            return render_template('login.html', err='该用户已存在')
+        # 检查密码
+        if check_password(password, user.password):
+            # session记录用户登录状态
+            session['uid'] = user.id
+            session['nickname'] = user.nickname
+            return render_template('/user/info')
+
+
+    else:
+        return render_template('login.html')
 
 
 @user_bp.route('/info')
-def info():
-    return render_template('info.html')
+@login_required.route()
+def info():  #查看用户信息
+
+    uid=session['uid']
+    user=User.query.get(uid)
+    return render_template('info.html',user=user)
 
 
 @user_bp.route('/logout')
-def logout():
+def logout():  #退出功能
+    session.clear()
     return redirect('/')
